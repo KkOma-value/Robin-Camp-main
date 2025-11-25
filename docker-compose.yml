@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: movies
+      MYSQL_USER: movieuser
+      MYSQL_PASSWORD: moviepass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrations:
+    image: gomicro/goose:3.7.0
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./db/migrations:/migrations
+    environment:
+      GOOSE_DRIVER: mysql
+      GOOSE_DBSTRING: movieuser:moviepass@tcp(mysql:3306)/movies?parseTime=true
+    command: ["up"]
+
+  api:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      PORT: 8080
+      AUTH_TOKEN: ${AUTH_TOKEN}
+      DB_URL: movieuser:moviepass@tcp(mysql:3306)/movies?parseTime=true
+      BOXOFFICE_URL: ${BOXOFFICE_URL}
+      BOXOFFICE_API_KEY: ${BOXOFFICE_API_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql_data:
