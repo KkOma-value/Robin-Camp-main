@@ -9,7 +9,7 @@ services:
       MYSQL_USER: movieuser
       MYSQL_PASSWORD: moviepass
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -28,7 +28,7 @@ services:
     environment:
       GOOSE_DRIVER: mysql
       GOOSE_DBSTRING: movieuser:moviepass@tcp(mysql:3306)/movies?parseTime=true
-    command: ["up"]
+    command: ["goose", "-dir", "/migrations", "up"]
 
   api:
     build: .
