@@ -74,11 +74,13 @@ docker compose ps
 
 预期输出：
 ```
-NAME                  SERVICE       STATUS         PORTS
-robin-camp-api-1      api           running        0.0.0.0:8080->8080/tcp
-robin-camp-mysql-1    mysql         running        0.0.0.0:3306->3306/tcp
-robin-camp-migrations-1  migrations  exited (0)
+NAME                       SERVICE       STATUS         PORTS
+robin-camp-main-api-1      api           running        0.0.0.0:8080->8080/tcp
+robin-camp-main-mysql-1    mysql         running        0.0.0.0:3307->3306/tcp
+robin-camp-main-migrations-1  migrations  exited (0)
 ```
+
+> **注意**：MySQL 端口映射为 `3307:3306`，避免与本地 MySQL 服务冲突。
 
 **测试健康检查：**
 ```bash
